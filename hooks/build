@@ -1,4 +1,6 @@
 #!/bin/bash -e
+export DOCKER_REPO=reg.docker.alibaba-inc.com/kubemaker/workflow-controller;
+export DOCKER_TAG=$1;
 docker_org=$(echo $DOCKER_REPO | rev | cut -d / -f 2- | rev)
 targets="workflow-controller argoexec argocli"
 for target in $targets; do

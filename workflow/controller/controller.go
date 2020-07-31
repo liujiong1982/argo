@@ -369,6 +369,7 @@ func (wfc *WorkflowController) runWorker() {
 // processNextItem is the worker logic for handling workflow updates
 func (wfc *WorkflowController) processNextItem() bool {
 	key, quit := wfc.wfQueue.Get()
+	log.Warnf("processNextItem WorkflowController: %s", key)
 	if quit {
 		return false
 	}
@@ -380,6 +381,7 @@ func (wfc *WorkflowController) processNextItem() bool {
 		return true
 	}
 	if !exists {
+		log.Warnf("processNextItem not exists: %s", key)
 		// This happens after a workflow was labeled with completed=true
 		// or was deleted, but the work queue still had an entry for it.
 		return true
@@ -419,6 +421,7 @@ func (wfc *WorkflowController) processNextItem() bool {
 
 	if wf.ObjectMeta.Labels[common.LabelKeyCompleted] == "true" {
 		wfc.throttler.Remove(key)
+		log.Warnf("processNextItem complete: %s", key)
 		// can get here if we already added the completed=true label,
 		// but we are still draining the controller's workflow workqueue
 		return true
@@ -436,6 +439,7 @@ func (wfc *WorkflowController) processNextItem() bool {
 	}
 
 	startTime := time.Now()
+	log.Warnf("operate: %s", key)
 	woc.operate()
 	wfc.metrics.OperationCompleted(time.Since(startTime).Seconds())
 	if woc.wf.Status.Fulfilled() {
@@ -477,6 +481,7 @@ func (wfc *WorkflowController) podWorker() {
 // adding the corresponding workflow key into the workflow workqueue.
 func (wfc *WorkflowController) processNextPodItem() bool {
 	key, quit := wfc.podQueue.Get()
+	log.Warnf("get from podQueue %s", key)
 	if quit {
 		return false
 	}
@@ -512,6 +517,7 @@ func (wfc *WorkflowController) processNextPodItem() bool {
 	// But this could be be much improved to become smarter by only
 	// requeue the workflow when there are changes that we care about.
 	wfc.wfQueue.Add(pod.ObjectMeta.Namespace + "/" + workflowName)
+	log.Warnf("add to wfc %s", pod.ObjectMeta.Namespace + "/" + workflowName)
 	return true
 }
 
@@ -561,6 +567,7 @@ func (wfc *WorkflowController) addWorkflowInformerHandlers() {
 			Handler: cache.ResourceEventHandlerFuncs{
 				AddFunc: func(obj interface{}) {
 					key, err := cache.MetaNamespaceKeyFunc(obj)
+					log.Infof("addWorkflowInformer: %s", key)
 					if err == nil {
 						wfc.wfQueue.Add(key)
 						priority, creation := getWfPriority(obj)
@@ -570,9 +577,13 @@ func (wfc *WorkflowController) addWorkflowInformerHandlers() {
 				UpdateFunc: func(old, new interface{}) {
 					oldWf, newWf := old.(*unstructured.Unstructured), new.(*unstructured.Unstructured)
 					if oldWf.GetResourceVersion() == newWf.GetResourceVersion() {
+						key, _ := cache.MetaNamespaceKeyFunc(new)
+						log.Infof("not updateWorkflowInformer: %s %s %s", key, oldWf.GetResourceVersion(),
+							newWf.GetResourceVersion())
 						return
 					}
 					key, err := cache.MetaNamespaceKeyFunc(new)
+					log.Infof("updateWorkflowInformer: %s", key)
 					if err == nil {
 						wfc.wfQueue.Add(key)
 						priority, creation := getWfPriority(new)
@@ -583,6 +594,7 @@ func (wfc *WorkflowController) addWorkflowInformerHandlers() {
 					// IndexerInformer uses a delta queue, therefore for deletes we have to use this
 					// key function.
 					key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+					log.Infof("deleteWorkflowInformer: %s", key)
 					if err == nil {
 						wfc.wfQueue.Add(key)
 						wfc.throttler.Remove(key)
@@ -642,6 +654,7 @@ func (wfc *WorkflowController) newPodInformer() cache.SharedIndexInformer {
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				key, err := cache.MetaNamespaceKeyFunc(obj)
+				log.Infof("addPodInformer: %s", key)
 				if err == nil {
 					wfc.podQueue.Add(key)
 				}
@@ -649,18 +662,26 @@ func (wfc *WorkflowController) newPodInformer() cache.SharedIndexInformer {
 			UpdateFunc: func(old, new interface{}) {
 				oldPod, newPod := old.(*apiv1.Pod), new.(*apiv1.Pod)
 				if oldPod.ResourceVersion == newPod.ResourceVersion {
+					key, _ := cache.MetaNamespaceKeyFunc(newPod)
+					log.Infof("not updatePodInformer: %s %s %s", key, oldPod.GetResourceVersion(),
+						newPod.GetResourceVersion())
 					return
 				}
 
 				key, err := cache.MetaNamespaceKeyFunc(new)
+				log.Infof("updatePodInformer: %s", key)
 				if err == nil {
+					log.Infof("add podQueue")
 					wfc.podQueue.Add(key)
+				} else {
+					log.Infof("updatePodInformer err: %v", err)
 				}
 			},
 			DeleteFunc: func(obj interface{}) {
 				// IndexerInformer uses a delta queue, therefore for deletes we have to use this
 				// key function.
 				key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+				log.Infof("deletePodInformer: %s", key)
 				if err == nil {
 					wfc.podQueue.Add(key)
 				}

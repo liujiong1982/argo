@@ -3,6 +3,18 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: nested-dag-outputs-
+  labels:
+    component: workflow
+    paiflow.pipelines.metadata.written: "true"
+    paiflow.pipelines.node.id: node-9bpr9x6ehbmojik5vt
+    paiflow.pipelines.parent.user.id: "1557702098194904"
+    paiflow.pipelines.pipeline.id: pipeline-qdmmg684tfscriepz8
+    paiflow.pipelines.root.node.id: node-ia1r315nipr58nbide
+    paiflow.pipelines.root.pipeline.id: pipeline-eiscq6f3i3e9fdwb2k
+    paiflow.pipelines.run.id: flow-13yqj9ggclnpjht1a9
+    paiflow.pipelines.user.id: "1557702098194904"
+    workflows.argoproj.io/completed: "true"
+    workflows.argoproj.io/workflow: flow-13yqj9ggclnpjht1a9
 spec:
   entrypoint: nested-dag-outputs
   templates:

@@ -738,7 +738,7 @@ type Outputs struct {
 
 // WorkflowStep is a reference to a template to execute in a series of step
 type WorkflowStep struct {
-	// Name of the step
+	// Name of the ste
 	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
 
 	// Template is the name of the template to execute as the step

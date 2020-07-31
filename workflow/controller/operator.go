@@ -187,6 +187,9 @@ func (woc *wfOperationCtx) operate() {
 
 	// Perform one-time workflow validation
 	if woc.wf.Status.Phase == "" {
+		//todo delete
+		woc.log.Infof("initial wf")
+
 		woc.markWorkflowRunning()
 		err := woc.createPDBResource()
 		if err != nil {
@@ -223,6 +226,9 @@ func (woc *wfOperationCtx) operate() {
 			woc.computeMetrics(woc.wfSpec.Metrics.Prometheus, woc.globalParams, realTimeScope, true)
 		}
 	} else {
+		//	todo delete
+		woc.log.Infof("podReconciliation")
+
 		woc.workflowDeadline = woc.getWorkflowDeadline()
 		err := woc.podReconciliation()
 		if err == nil {
@@ -470,6 +476,10 @@ func (woc *wfOperationCtx) persistUpdates() {
 	wfClient := woc.controller.wfclientset.ArgoprojV1alpha1().Workflows(woc.wf.ObjectMeta.Namespace)
 	// try and compress nodes if needed
 	nodes := woc.wf.Status.Nodes
+	//todo delete
+	nodesStr, _ := json.Marshal(nodes)
+	woc.log.Warnf("nodesStr: %s", nodesStr)
+
 	err := woc.controller.hydrator.Dehydrate(woc.wf)
 	if err != nil {
 		woc.log.Warnf("Failed to dehydrate: %v", err)
@@ -566,6 +576,11 @@ func (woc *wfOperationCtx) reapplyUpdate(wfClient v1alpha1.WorkflowInterface, no
 		return nil, err
 	}
 	patchBytes, err := jsonpatch.CreateMergePatch(oldData, newData)
+
+	//todo delete
+	//woc.log.Warnf("old data: %s", oldData)
+	//woc.log.Warnf("patchBytes data: %s", patchBytes)
+
 	if err != nil {
 		return nil, err
 	}
@@ -768,8 +783,12 @@ func (woc *wfOperationCtx) podReconciliation() error {
 
 		wfNodesLock.Lock()
 		defer wfNodesLock.Unlock()
+
 		if node, ok := woc.wf.Status.Nodes[nodeID]; ok {
 			if newState := woc.assessNodeStatus(pod, &node); newState != nil {
+				//todo delete
+				woc.log.Infof("node status changed %s %s", node.ID, newState)
+
 				woc.wf.Status.Nodes[nodeID] = *newState
 				woc.addOutputsToGlobalScope(node.Outputs)
 				woc.updated = true
@@ -958,6 +977,9 @@ func printPodSpecLog(pod *apiv1.Pod, wfName string) {
 // assessNodeStatus compares the current state of a pod with its corresponding node
 // and returns the new node status if something changed
 func (woc *wfOperationCtx) assessNodeStatus(pod *apiv1.Pod, node *wfv1.NodeStatus) *wfv1.NodeStatus {
+	//todo delete
+	woc.log.Infof("assessNodeStatus %s %s", node.ID, pod.Name)
+
 	var newPhase wfv1.NodePhase
 	var newDaemonStatus *bool
 	var message string

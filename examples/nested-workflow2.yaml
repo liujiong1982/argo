@@ -1,0 +1,37 @@
+# This example demonstrates the ability to pass and return
+# parameters and artifacts into and out of nested workflows
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: nested-workflow-
+  labels:
+    paiflow.pipelines.run.id: "11"
+    paiflow.pipelines.user.id: "dsf"
+spec:
+  entrypoint: nested-workflow-example
+  templates:
+  - name: nested-workflow-example
+    steps:
+    - - name: generate
+        template: generate
+
+  # container template which generates an output parameter and artifact
+  - name: generate
+    container:
+      image: docker/whalesay:latest
+      command: [sh, -c]
+      args: ["
+        cowsay hello world | tee /tmp/my-output-artifact.txt &&
+        echo 'my-output-parameter' > /tmp/my-output-parameter.txt
+      "]
+    outputs:
+      parameters:
+      - name: out-parameter
+        valueFrom:
+          path: /tmp/my-output-parameter.txt
+      artifacts:
+      - name: out-artifact
+        path: /tmp/my-output-artifact.txt
+        raw:
+          data: |
+            this is output content

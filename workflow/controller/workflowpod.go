@@ -874,6 +874,11 @@ func (woc *wfOperationCtx) addArchiveLocation(pod *apiv1.Pod, tmpl *wfv1.Templat
 	tmpl.ArchiveLocation = &wfv1.ArtifactLocation{
 		ArchiveLogs: woc.artifactRepository.ArchiveLogs,
 	}
+
+	//todo delete
+	tmplBytes, _ := json.Marshal(woc.artifactRepository)
+	woc.log.Debugf("artifact repository information value is %s", tmplBytes)
+
 	// artifact location is defaulted using the following formula:
 	// <worflow_name>/<pod_name>/<artifact_name>.tgz
 	// (e.g. myworkflowartifacts/argo-wf-fhljp/argo-wf-fhljp-123291312382/src.tgz)
@@ -907,7 +912,7 @@ func (woc *wfOperationCtx) addArchiveLocation(pod *apiv1.Pod, tmpl *wfv1.Templat
 			Force:      hdfsLocation.Force,
 		}
 	} else if ossLocation := woc.artifactRepository.OSS; ossLocation != nil {
-		woc.log.Debugf("Setting OSS artifact repository information")
+		woc.log.Debugf("xianzhi Setting OSS artifact repository information")
 		artLocationKey := ossLocation.KeyFormat
 		// NOTE: we use unresolved variables, will get substituted later
 		if artLocationKey == "" {
@@ -936,7 +941,11 @@ func (woc *wfOperationCtx) addArchiveLocation(pod *apiv1.Pod, tmpl *wfv1.Templat
 			Key: artLocationKey,
 		}
 	} else {
-		return errors.Errorf(errors.CodeBadRequest, "controller is not configured with a default archive location")
+		woc.log.Errorf("woc.artifactRepository start")
+		patch, _ := json.Marshal(woc.artifactRepository)
+		woc.log.Errorf("%s", patch)
+		woc.log.Errorf("woc.artifactRepository end")
+		return errors.Errorf(errors.CodeBadRequest, "controller11 is not configured with a default archive location")
 	}
 	return nil
 }

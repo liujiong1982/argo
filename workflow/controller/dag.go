@@ -273,9 +273,15 @@ func (d *dagContext) hasMoreRetries(node *wfv1.NodeStatus) bool {
 
 func (woc *wfOperationCtx) executeDAG(nodeName string, tmplCtx *templateresolution.Context, templateScope string, tmpl *wfv1.Template, orgTmpl wfv1.TemplateReferenceHolder, opts *executeTemplateOpts) (*wfv1.NodeStatus, error) {
 	node := woc.getNodeByName(nodeName)
+	//todo delete
+	woc.log.Infof("executeDAG %s", nodeName)
+
 	if node == nil {
 		node = woc.initializeExecutableNode(nodeName, wfv1.NodeTypeDAG, templateScope, tmpl, orgTmpl, opts.boundaryID, wfv1.NodeRunning)
 	}
+
+	//todo delete
+	woc.log.Infof("initialed executeDAG %s %s %s", node.ID, nodeName, node.Phase)
 
 	defer func() {
 		if woc.wf.Status.Nodes[node.ID].Fulfilled() {

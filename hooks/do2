@@ -1,0 +1,12 @@
+tag="upstream-master-v3-0530-2020"
+argocli=7634b4f9ff53
+controller=cb18a746673e
+argoexec=0eb518a793e8
+
+docker tag $argocli registry.cn-shanghai.aliyuncs.com/dsw_test/argocli:$tag
+docker tag $controller registry.cn-shanghai.aliyuncs.com/dsw_test/workflow-controller:$tag
+docker tag $argoexec registry.cn-shanghai.aliyuncs.com/dsw_test/argoexec:$tag
+
+docker push registry.cn-shanghai.aliyuncs.com/dsw_test/argocli:$tag
+docker push registry.cn-shanghai.aliyuncs.com/dsw_test/workflow-controller:$tag
+docker push registry.cn-shanghai.aliyuncs.com/dsw_test/argoexec:$tag

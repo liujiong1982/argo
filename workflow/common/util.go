@@ -283,7 +283,11 @@ func ProcessArgs(tmpl *wfv1.Template, args wfv1.ArgumentsProvider, globalParams,
 				return nil, errors.Errorf(errors.CodeBadRequest, "inputs.artifacts.%s was not supplied", inArt.Name)
 			}
 			if !argArt.HasLocation() && !validateOnly {
-				return nil, errors.Errorf(errors.CodeBadRequest, "inputs.artifacts.%s missing location information", inArt.Name)
+				//todo delete
+				tmplBytes, _ := json.Marshal(tmpl)
+				return nil, errors.Errorf(errors.CodeBadRequest,
+					"inputs.artifacts.%s missing location information %s %s",
+					inArt.Name, tmplBytes, newTmpl.Name)
 			}
 		}
 		if argArt != nil {

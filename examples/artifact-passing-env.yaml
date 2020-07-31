@@ -20,7 +20,7 @@ spec:
           parameters:
           - name: num
             value: "{{item}}"
-        withItems: [1, 2, 3, 4]
+        withItems: [1]
       # Next, for each even number, divide it by two (using a script template).
       # Skip odd numbers using a `when` clause.
       - name: divide-by-2
@@ -31,7 +31,7 @@ spec:
           - name: num
             value: "{{item.num}}"
         withParam: "{{tasks.odd-or-even.outputs.parameters}}"
-        when: "{{item.evenness}} == even"
+        when: "{{item.evenness}} == odd"
       # Finally, print all numbers processed in the previous step
       - name: print
         dependencies: [divide-by-2]
@@ -78,7 +78,7 @@ spec:
       command: [sh, -x]
       source: |
         #!/bin/sh
-        echo $(({{inputs.parameters.num}}/2))
+        echo $(({{inputs.parameters.num}}*2))
 
   # whalesay prints a number using whalesay
   - name: whalesay
@@ -86,6 +86,11 @@ spec:
       parameters:
       - name: message
     container:
+      env:
+      - name: a
+        value: '{{inputs.parameters.message}}'
       image: docker/whalesay:latest
-      command: [cowsay]
-      args: ["{{inputs.parameters.message}}"]
+      command: [sh, -c]
+      args:
+      - |
+        echo $a

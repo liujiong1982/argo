@@ -1,0 +1,51 @@
+# Visual UI test workflow which resulted in strange edges between nodes in a workflow
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: ui-nested-steps-
+spec:
+  entrypoint: ui-nested-steps
+  volumes:
+  - name: workdir
+    emptyDir: {}
+  templates:
+  - name: ui-nested-steps
+    steps:       
+    - - name: LOCATE-FACES
+        template: locate-faces
+
+    - - name: HANDLE-INDIVIDUAL-FACES
+        template: echo
+        arguments:
+          parameters:
+          - name: message
+            value: "{{steps.LOCATE-FACES.outputs.parameters.imagemagick-commands}}"
+
+
+  - name: locate-faces
+    container:
+      image: alpine:latest
+      command:
+      - sh
+      - -c
+      - 'echo "{\"fruit\": \"Apple11\"}" > /workdir/result.json'
+      volumeMounts:
+      - name: workdir
+        mountPath: /workdir
+    outputs:
+      parameters:
+      - name: imagemagick-commands
+        valueFrom:
+          path: /workdir/result.json
+
+  - name: echo
+    inputs:
+      parameters:
+      - name: message
+    container:
+      image: 'registry.cn-shanghai.aliyuncs.com/kubeflow_demo/kf_odpscmd:0.7'
+      command: ['/bin/sh', '-c']
+      args: ["echo '{{inputs.parameters.message}}' | jq .fruit"]
+#      command: [echo]
+#      args:
+#      - "{{inputs.parameters.message}} | jq .fruit"

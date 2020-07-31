@@ -1,0 +1,13 @@
+tag=`docker images | grep argocli | head -n 1 | awk '{print $2}'`
+echo $tag
+argocli=`docker images | grep argocli | head -n 1 | awk '{print $3}'`
+controller=`docker images | grep workflow-controller | head -n 1 | awk '{print $3}'`
+argoexec=`docker images | grep argoexec | head -n 1 | awk '{print $3}'`
+
+docker tag $argocli registry.cn-shanghai.aliyuncs.com/dsw_test/argocli:$tag
+docker tag $controller registry.cn-shanghai.aliyuncs.com/dsw_test/workflow-controller:$tag
+docker tag $argoexec registry.cn-shanghai.aliyuncs.com/dsw_test/argoexec:$tag
+
+docker push registry.cn-shanghai.aliyuncs.com/dsw_test/argocli:$tag
+docker push registry.cn-shanghai.aliyuncs.com/dsw_test/workflow-controller:$tag
+docker push registry.cn-shanghai.aliyuncs.com/dsw_test/argoexec:$tag

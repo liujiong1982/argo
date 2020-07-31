@@ -17,6 +17,9 @@ DOCKER_BUILD_OPTS     := --no-cache
 # Use a different Dockerfile, e.g. for building for Windows or dev images.
 DOCKERFILE            := Dockerfile
 
+$(info $$var is [${GOPATH}])
+FILES := $(shell ls /go/)
+$(info $$FILES is [${FILES}])
 
 # docker image publishing options
 IMAGE_NAMESPACE       ?= argoproj
@@ -172,9 +175,12 @@ else
 	echo "Built without static files" > ui/dist/app/index.html
 endif
 
+
 $(GOPATH)/bin/staticfiles:
 	$(call backup_go_mod)
+	#todo change go get bou.ke/staticfiles to go get github.com/bouk/staticfiles
 	go get bou.ke/staticfiles
+	#go get github.com/bouk/staticfiles
 	$(call restore_go_mod)
 
 server/static/files.go: $(GOPATH)/bin/staticfiles ui/dist/app/index.html

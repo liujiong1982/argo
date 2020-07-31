@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: input-artifact-raw-
+  labels:
+    paiflow-pipelines-node-token: "pai-node-14o622p7lym0vb8wcb1"
+    paiflow-pipelines-parent-user-id: "1557702098194904"
+    paiflow-pipelines-pipeline-id: "15c3b000b5c74427c9c74a6a6e15e2b22"
+    paiflow-pipelines-root-node-token: "1pai-node-w761w6d58f8be9xbnn"
+    paiflow-pipelines-root-pipeline-id: "1fda7f0a92d784864a15a9ae011f3185f"
+    paiflow-pipelines-run-token: "1pai-flow-ao65m05ndbjd7xmt6q"
+    paiflow-pipelines-user-id: "1557702098194904"
+spec:
+  entrypoint: raw-contents
+  templates:
+  - name: raw-contents
+    inputs:
+      artifacts:
+      - name: myfile
+        path: /tmp/file
+        raw:
+          data: |
+            this is
+            the raw file
+            contents
+    container:
+      image: golang:1.9.2
+      command: [sleep 99999999]

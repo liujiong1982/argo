@@ -2,6 +2,9 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: input-artifact-raw-
+  labels:
+    paiflow.pipelines.run.id: "11"
+    paiflow.pipelines.user.id: "dsf"
 spec:
   entrypoint: raw-contents
   templates:
@@ -15,7 +18,14 @@ spec:
             this is
             the raw file
             contents
+    outputs:
+      artifacts:
+      - name: myfile
+        path: /tmp/file2
+        raw:
+          data: |
+            this is output content
     container:
       image: alpine:latest
-      command: [sh, -c]
-      args: ["cat /tmp/file"]
+      command: [/bin/sh -c]
+      args: ["cat /tmp/file & touch /tmp/file2"]
