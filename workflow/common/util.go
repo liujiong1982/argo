@@ -39,6 +39,8 @@ func FindOverlappingVolume(tmpl *wfv1.Template, path string) *apiv1.VolumeMount 
 		volMounts = tmpl.Container.VolumeMounts
 	} else if tmpl.Script != nil {
 		volMounts = tmpl.Script.VolumeMounts
+	} else if tmpl.DAG != nil {
+		return
 	} else {
 		return nil
 	}
